@@ -27,6 +27,6 @@ if not response.ok:
     print "{r.status_code} {r.reason}: {r.text}".format(r=response)
     exit()
 
-# Get the new business unit created from the response, type will be dict
+# Get the new user created from the response, type will be dict
 new_user = response.json()
 print new_user

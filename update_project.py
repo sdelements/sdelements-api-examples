@@ -35,6 +35,6 @@ if not response.ok:
     print "{r.status_code} {r.reason}: {r.text}".format(r=response)
     exit()
 
-# Get the new business unit created from the response, type will be dict
+# Get the updated project from the response, type will be dict
 project = response.json()
 print project
