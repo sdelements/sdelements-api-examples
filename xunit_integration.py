@@ -1,12 +1,12 @@
 import os
 import re
-import requests  # Excellent library for making HTTP requests with python
+import requests
 
 from defusedxml import minidom
 
-SDE_SERVER = os.environ['SDE_SERVER'] or 'cd.sdelements.com'
+SDE_SERVER = os.environ['SDE_SERVER'] # The server, for example: cd.sdelements.com
 API_TOKEN  = os.environ['SDE_API_TOKEN']  # Set the API token, here I get it from an environment variable
-PROJECT_ID = os.environ['SDE_PROJECT_ID']
+PROJECT_ID = os.environ['SDE_PROJECT_ID'] # The project ID. You can get it on the overview page as of v4.15.
 
 request_headers = {
     'Authorization': "Token " + API_TOKEN,  # All SDE API requests need an Authorization header with API token
@@ -14,7 +14,7 @@ request_headers = {
     'Accept': "application/json",  # Ask the API to send the response in JSON
 }
 
-test_file = "results.xml"
+test_file = "results.xml" # The report file is hard-coded here, you may want to make it a parameter
 
 try:
     base = minidom.parse(test_file)
