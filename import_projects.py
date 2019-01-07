@@ -178,8 +178,8 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Import projects to SD Elements using CSV')
-    parser.add_argument('--csv', help='Project source code to scan', required=True)
-    parser.add_argument('--mapping', help='Dependency Check report (optional)', required=True)
+    parser.add_argument('--csv', help='Projects to import with other data', required=True)
+    parser.add_argument('--mapping', help='Mapping from CSV file to SD Elements', required=True)
     parser.add_argument('--row_start', help='Row to start import', required=False)
     parser.add_argument('--length', help='Number of entries to import', required=False)
     parser.add_argument('--sde_host', help="FQDN of SD Elements server", required=True)
