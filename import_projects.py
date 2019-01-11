@@ -27,14 +27,14 @@ def transform_value(value, data):
     return Template(value).substitute(data)
 
 
-def get_or_create_bu(args, bu_name):
+def get_or_create_bu(args, bu_name, validate_cert):
     
     # Send the HTTP request to the APIa
     params = {
        'name': bu_name
     }
     request_url = "https://{0}/api/v2/business-units/".format(args.sde_host)
-    response = requests.get(request_url, params=params, headers=get_headers(args))
+    response = requests.get(request_url, params=params, headers=get_headers(args), verify=validate_cert)
 
     if not response.ok:
         # Request did not go through because of an error, print the error
@@ -54,7 +54,7 @@ def get_or_create_bu(args, bu_name):
 
         # Send the HTTP request to the API
         request_url = "https://{0}/api/v2/business-units/".format(args.sde_host)
-        response = requests.post(request_url, json=request_body, headers=get_headers(args))
+        response = requests.post(request_url, json=request_body, headers=get_headers(args), verify=validate_cert)
         if not response.ok:
             # Request did not go through because of an error, print the error
             print "{r.status_code} {r.reason}: {r.text}".format(r=response)
@@ -64,7 +64,7 @@ def get_or_create_bu(args, bu_name):
 
     return bu
 
-def get_or_create_application(args, bu_id, app_name, attrs):
+def get_or_create_application(args, bu_id, app_name, attrs, validate_cert):
     params = {
        'business_unit': bu_id,
        'name': app_name
@@ -72,7 +72,7 @@ def get_or_create_application(args, bu_id, app_name, attrs):
 
     # Send the HTTP request to the APIa
     request_url = "https://{0}/api/v2/applications/".format(args.sde_host)
-    response = requests.get(request_url, params=params, headers=get_headers(args))
+    response = requests.get(request_url, params=params, headers=get_headers(args), verify=validate_cert)
 
     if not response.ok:
         # Request did not go through because of an error, print the error
@@ -94,7 +94,7 @@ def get_or_create_application(args, bu_id, app_name, attrs):
 
         # Send the HTTP request to the API
         request_url = "https://{0}/api/v2/applications/".format(args.sde_host)
-        response = requests.post(request_url, json=request_body, headers=get_headers(args))
+        response = requests.post(request_url, json=request_body, headers=get_headers(args), verify=validate_cert)
         if not response.ok:
             # Request did not go through because of an error, print the error
             print "{r.status_code} {r.reason}: {r.text}".format(r=response)
@@ -105,7 +105,7 @@ def get_or_create_application(args, bu_id, app_name, attrs):
     return app
 
 
-def create_project(args, application_id, project_name, profile_id, attrs):
+def create_project(args, application_id, project_name, profile_id, attrs, validate_cert):
     request_body = {
         "application": application_id,  # The ID of the application the project should be created under.
         "name": project_name,  # The name of the new project.
@@ -118,7 +118,7 @@ def create_project(args, application_id, project_name, profile_id, attrs):
 
     # Send the HTTP request to the APIa
     request_url = "https://{0}/api/v2/projects/".format(args.sde_host)
-    response = requests.post(request_url, json=request_body, headers=get_headers(args))
+    response = requests.post(request_url, json=request_body, headers=get_headers(args), verify=validate_cert)
 
     if not response.ok:
         # Request did not go through because of an error, print the error
@@ -129,7 +129,7 @@ def create_project(args, application_id, project_name, profile_id, attrs):
     return response.json()
 
 
-def import_project(args, row, mapping):
+def import_project(args, row, mapping, validate_cert):
 
     bu_name = transform_value(mapping['business_unit'], row)
     app_name = transform_value(mapping['application_name'], row)
@@ -144,14 +144,18 @@ def import_project(args, row, mapping):
         app_attrs[a] = transform_value(mapping['application_attrs'][a], row)
 
 
-    bu = get_or_create_bu(args, bu_name)
-    app = get_or_create_application(args, bu['id'], app_name, app_attrs)
-    return create_project(args, app['id'], project_name, 'P1', project_attrs)
+    bu = get_or_create_bu(args, bu_name, validate_cert)
+    app = get_or_create_application(args, bu['id'], app_name, app_attrs, validate_cert)
+    return create_project(args, app['id'], project_name, 'P1', project_attrs, validate_cert)
 
 def main(args):
     count =0 
     start = 0
     length = 0
+    validate_cert = True
+
+    if args.verify_cert:
+        validate_cert = (args.verify_cert.lower() == "true")
 
     if args.row_start and args.length:
         start = int(args.row_start)
@@ -173,7 +177,7 @@ def main(args):
 
             print "Processing row: {0}".format(count)
 
-            prj = import_project(args, row, mapping)
+            prj = import_project(args, row, mapping, validate_cert)
             print prj['url']
 
 if __name__ == "__main__":
@@ -184,6 +188,7 @@ if __name__ == "__main__":
     parser.add_argument('--length', help='Number of entries to import', required=False)
     parser.add_argument('--sde_host', help="FQDN of SD Elements server", required=True)
     parser.add_argument('--sde_api_token', help="API Token for SD Elements server", required=True)
+    parser.add_argument('--verify_cert', help="Validate TLS server certificates (default=True)", required=False)
 
     args = parser.parse_args()
 
