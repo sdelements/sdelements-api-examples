@@ -1,0 +1,25 @@
+{
+    "business_unit": {
+        "name": "${OrgUnit} - ${GlobalBusinessLine}",
+        "groups": [{
+            "name": "${OrgUnit} - ${GlobalBusinessLine} Group", "role": "User"
+        }]
+    },
+    "application": {
+        "name": "${ApplicationName}",
+        "attributes": {
+            "Internal_App_ID": "${AppId}"
+        }
+    },
+    "project": {
+        "name": "Baseline",
+        "attributes": {
+            "project_attribute": "${DataClassification}"
+        },
+        "groups": [{
+            "name": "${OrgUnit} - ${GlobalBusinessLine} Group", "role": "Normal"
+        }],
+        "profile": "P1"
+    }
+}
+
