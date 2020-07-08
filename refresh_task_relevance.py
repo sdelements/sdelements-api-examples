@@ -19,7 +19,7 @@ print("Using API Token: {}...".format(API_TOKEN[:5]))
 
 projects_url = PROJECTS_URL
 while True:
-    response = requests.get(projects_url, headers=REQUESTS_HEADER)
+    response = requests.get(projects_url, headers=REQUESTS_HEADER, verify=False)
     response.raise_for_status()
 
     data = response.json()
@@ -27,13 +27,13 @@ while True:
     # loop over the projects to accept tasks
     for project_id, name in [(project['id'], project['name']) for project in data['results']]:
         tasks_url = f'{SERVER}/api/v2/projects/{project_id}/task-updates/'
-        response = requests.get(tasks_url)
+        response = requests.get(tasks_url, headers=REQUESTS_HEADER, verify=False)
         response.raise_for_status()
 
         data = response.json()
 
         if not data["results"]:
-            print(f'No new tasks for project {name} ({project_id})')
+            print(f'Project {name} ({project_id}): no updates')
         else:
             added_tasks = 0
             removed_tasks = 0
@@ -42,11 +42,11 @@ while True:
                     removed_tasks += 1
                 elif not task["accepted"] and task["relevant"]:
                     added_tasks += 1
-            print(f'There are {added_tasks} new tasks and {removed_tasks} removed tasks')
+            print(f'Project {name} ({project_id}): there are {added_tasks} new tasks and {removed_tasks} removed tasks')
 
     # Grab the URL of the next page of results to fetch; if this entry is
     # blank we have reached the last page
-    if data["next"]:
+    if "next" in data:
         projects_url = data["next"]
     else:
         break
