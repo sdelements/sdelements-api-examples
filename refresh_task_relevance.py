@@ -24,11 +24,25 @@ while True:
 
     data = response.json()
 
-    # Extract all the profile names stored in the API response
-    for project_id in [project['id'] for project in data['results']]:
+    # loop over the projects to accept tasks
+    for project_id, name in [(project['id'], project['name']) for project in data['results']]:
         tasks_url = f'{SERVER}/api/v2/projects/{project_id}/task-updates/'
-        response = requests.post(tasks_url)
+        response = requests.get(tasks_url)
         response.raise_for_status()
+
+        data = response.json()
+
+        if not data["results"]:
+            print(f'No new tasks for project {name} ({project_id})')
+        else:
+            added_tasks = 0
+            removed_tasks = 0
+            for task in data["results"]:
+                if task["accepted"] and not task["relevant"]:
+                    removed_tasks += 1
+                elif not task["accepted"] and task["relevant"]:
+                    added_tasks += 1
+            print(f'There are {added_tasks} new tasks and {removed_tasks} removed tasks')
 
     # Grab the URL of the next page of results to fetch; if this entry is
     # blank we have reached the last page
